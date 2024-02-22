@@ -1,6 +1,6 @@
-import { categories } from "../models";
+import * as categories from "./categories.model";
 import { FastifyReply, FastifyRequest } from "fastify";
-import app from "../app";
+import app from "../../app";
 export const fetch = async (req: FastifyRequest, reply: FastifyReply) => {
   const result = await categories.fetch();
   if (result) {

@@ -1,5 +1,5 @@
 import { sql } from "kysely";
-import app from "../app";
+import app from "../../app";
 
 export const insertLog = async (
   network: string,

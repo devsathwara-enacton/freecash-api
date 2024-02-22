@@ -1,6 +1,6 @@
 import { UpdateResult } from "kysely";
-import app from "../app";
-import { UserTbl } from "../database/db";
+import app from "../../app";
+import { UserTbl } from "../../database/db";
 
 export const register = async (
   name: string,

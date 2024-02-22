@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { task } from "../models";
+import * as task from "./task.model";
 
 export const fetch = async (req: FastifyRequest, reply: FastifyReply) => {
   const {

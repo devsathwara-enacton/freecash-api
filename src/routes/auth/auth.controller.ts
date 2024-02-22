@@ -1,9 +1,9 @@
-import { auth } from "../models";
+import * as auth from "./auth.model";
 import { FastifyReply, FastifyRequest } from "fastify";
 import bcrypt from "bcrypt";
-import { createJWTToken, decodeToken } from "../utils/jwt";
-import { sendEmail } from "../utils/sendEmail";
-import { config } from "../config/config";
+import { createJWTToken, decodeToken } from "../../utils/jwt";
+import { sendEmail } from "../../utils/sendEmail";
+import { config } from "../../config/config";
 
 interface user {
   name: string;

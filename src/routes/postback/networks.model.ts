@@ -1,5 +1,5 @@
 import { sql } from "kysely";
-import app from "../app";
+import app from "../../app";
 
 export const fetch = async (type: "tasks" | "surveys", name: string) => {
   const result = app.db

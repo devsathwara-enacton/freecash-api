@@ -1,8 +1,9 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import app from "../app";
+import app from "../../app";
 
 import crypto from "crypto";
-import { postback, networks } from "../models";
+import * as networks from "./networks.model";
+import * as postback from "./postback.model";
 const validateHash = (receivedHash: string, combinedData: any) => {
   // Create a hash using the combined data and the secret key
   const generatedHash = crypto

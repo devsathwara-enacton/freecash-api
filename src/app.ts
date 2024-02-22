@@ -40,6 +40,15 @@ const createApp = (): CustomFastifyInstance => {
   if (!sessionSalt) {
     throw new Error("Session salt is not defined in the config");
   }
+  app.register(require("fastify-healthcheck"));
+  app.setErrorHandler(
+    (error: Error, request: FastifyRequest, reply: FastifyReply) => {
+      console.log(error.toString());
+      reply.send({ error: error });
+    }
+  );
+  app.register(cors);
+  app.register(fastifyCookie);
   app.register(fastifySecureSession, {
     secret: sessionSecret,
     salt: sessionSalt,
@@ -54,6 +63,9 @@ const createApp = (): CustomFastifyInstance => {
       // domain: ".enactweb.com",
     },
   });
+  // app.register(require("@fastify/flash"));
+  app.register(fastifyPassport.initialize());
+  app.register(fastifyPassport.secureSession());
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
 
@@ -82,7 +94,60 @@ const createApp = (): CustomFastifyInstance => {
     dir: join(__dirname, "routes"),
     options: { prefix: "/api/v1" }, // Use a prefix for all routes
   });
-
+  app.get(
+    "/google/auth",
+    {
+      preValidation: fastifyPassport.authenticate("google", {
+        scope: ["profile", "email"],
+        state: "sds3sddd",
+        failureRedirect: "/",
+      }),
+    },
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const { code, scope, authuser, prompt } = req.query as {
+        code: string;
+        scope: string;
+        authuser: string;
+        prompt: string;
+      };
+      console.log(code, scope, authuser, prompt);
+    }
+  );
+  app.get(
+    "/auth/google/callback",
+    {
+      preValidation: fastifyPassport.authenticate("google", {
+        scope: ["profile", "email"],
+        state: "sds3sddd",
+        failureRedirect: "/",
+      }),
+    },
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const { code, scope, authuser, prompt } = req.query as {
+        code: string;
+        scope: string;
+        authuser: string;
+        prompt: string;
+      };
+      console.log(req.query);
+      return reply.redirect(
+        `/google/auth?code=${code}&scope=${scope}&authuser=${authuser}&prompt=${prompt}`
+      );
+      let accessToken = await createJWTToken(
+        { user: req.user },
+        `${parseInt(config.env.app.expiresIn)}h`
+      );
+      reply.setCookie("accessToken", accessToken.toString(), {
+        path: "/",
+        httpOnly: false,
+        expires: new Date(Date.now() + 3600000),
+        sameSite: "none",
+        secure: true,
+        domain: ".enactweb.com",
+      });
+      reply.send({ success: "true" });
+    }
+  );
   return app;
 };
 const app: CustomFastifyInstance = createApp();

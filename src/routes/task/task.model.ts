@@ -1,5 +1,5 @@
 import { QueryCreator, sql } from "kysely";
-import app from "../app";
+import app from "../../app";
 
 interface CombinedResult {
   // Properties from OfferwallTasks
