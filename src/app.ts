@@ -19,19 +19,22 @@ import {
 import fastifyCookie from "@fastify/cookie";
 import fastifySecureSession from "@fastify/secure-session";
 import fastifyPassport from "@fastify/passport";
-import "./utils/passport";
+import "./routes/auth/passport";
 import cors from "@fastify/cors";
 import { config } from "./config/config";
 import axios from "axios";
-import { createJWTToken, decodeToken, validateJWTToken } from "./utils/jwt";
+import {
+  createJWTToken,
+  decodeToken,
+  validateJWTToken,
+} from "./routes/auth/jwt";
 import { db } from "./database/database";
-interface CustomFastifyInstance extends FastifyInstance {
-  db: Kysely<DB>;
-}
+import { swaggerOptions, swaggerUiOptions } from "./utils/swagger";
+interface CustomFastifyInstance extends FastifyInstance {}
 
 const createApp = (): CustomFastifyInstance => {
   const app = fastify({ logger: true }) as unknown as CustomFastifyInstance;
-  app.decorate("db", db);
+
   const sessionSecret = config.env.app.sessionSecret?.toString();
   if (!sessionSecret) {
     throw new Error("Session secret is not defined in the config");
@@ -69,50 +72,33 @@ const createApp = (): CustomFastifyInstance => {
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
 
-  app.register(fastifySwagger, {
-    openapi: {
-      info: {
-        title: "SampleApi",
-        description: "Sample backend service",
-        version: "1.0.0",
-      },
-      servers: [],
-    },
-    transform: jsonSchemaTransform,
-    // You can also create transform with custom skiplist of endpoints that should not be included in the specification:
-    //
-    // transform: createJsonSchemaTransform({
-    //   skipList: [ '/documentation/static/*' ]
-    // })
-  });
-  app.register(fastifySwaggerUi, {
-    routePrefix: "/documentation",
-  });
+  app.register(fastifySwagger, swaggerOptions);
+  app.register(fastifySwaggerUi, swaggerUiOptions);
 
   // Register autoload for routes
   app.register(autoload, {
     dir: join(__dirname, "routes"),
     options: { prefix: "/api/v1" }, // Use a prefix for all routes
   });
-  app.get(
-    "/google/auth",
-    {
-      preValidation: fastifyPassport.authenticate("google", {
-        scope: ["profile", "email"],
-        state: "sds3sddd",
-        failureRedirect: "/",
-      }),
-    },
-    async (req: FastifyRequest, reply: FastifyReply) => {
-      const { code, scope, authuser, prompt } = req.query as {
-        code: string;
-        scope: string;
-        authuser: string;
-        prompt: string;
-      };
-      console.log(code, scope, authuser, prompt);
-    }
-  );
+  // app.get(
+  //   "/google/auth",
+  //   {
+  //     preValidation: fastifyPassport.authenticate("google", {
+  //       scope: ["profile", "email"],
+  //       state: "sds3sddd",
+  //       failureRedirect: "/",
+  //     }),
+  //   },
+  //   async (req: FastifyRequest, reply: FastifyReply) => {
+  //     const { code, scope, authuser, prompt } = req.query as {
+  //       code: string;
+  //       scope: string;
+  //       authuser: string;
+  //       prompt: string;
+  //     };
+  //     console.log(code, scope, authuser, prompt);
+  //   }
+  // );
   app.get(
     "/auth/google/callback",
     {
@@ -129,10 +115,10 @@ const createApp = (): CustomFastifyInstance => {
         authuser: string;
         prompt: string;
       };
-      console.log(req.query);
-      return reply.redirect(
-        `/google/auth?code=${code}&scope=${scope}&authuser=${authuser}&prompt=${prompt}`
-      );
+      console.log(req.user);
+      // return reply.redirect(
+      //   `/google/auth?code=${code}&scope=${scope}&authuser=${authuser}&prompt=${prompt}`
+      // );
       let accessToken = await createJWTToken(
         { user: req.user },
         `${parseInt(config.env.app.expiresIn)}h`

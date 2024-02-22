@@ -1,25 +1,21 @@
+import { createJsonSchemaTransform } from "fastify-type-provider-zod";
+
 export const swaggerOptions = {
-  swagger: {
+  openapi: {
     info: {
-      title: "FreeCash Api",
-      description: "My Description.",
+      title: "Freecash API",
+      description: "Cash earning platform",
       version: "1.0.0",
     },
-    host: "localhost:3000",
-    schemes: ["http"],
-    consumes: ["application/json"],
-    produces: ["application/json"],
-    tags: [
-      { name: "Offers", description: "Offers" },
-      { name: "Categories", description: "Categories" },
-      { name: "Postback", description: "Postback" },
-      { name: "Providers", description: "Providers" },
-      { name: "Authentication", description: "Authentication" },
-    ],
+    servers: [],
   },
+  // transform: jsonSchemaTransform,
+  // You can also create transform with custom skiplist of endpoints that should not be included in the specification:
+  //
+  transform: createJsonSchemaTransform({
+    skipList: ["/api/v1/auth/google", "/api/v1/auth/facebook"],
+  }),
 };
-
 export const swaggerUiOptions = {
   routePrefix: "/docs",
-  exposeRoute: true,
 };

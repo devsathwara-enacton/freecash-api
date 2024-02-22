@@ -1,14 +1,13 @@
 import { UpdateResult } from "kysely";
-import app from "../../app";
-import { UserTbl } from "../../database/db";
+import { db } from "../../database/database";
 
 export const register = async (
   name: string,
   email: string,
   password: string
 ) => {
-  const result = app.db
-    .insertInto("user_tbl")
+  const result = db
+    .insertInto("users")
     .values({ email: email, name: name, password: password })
     .execute();
   return result;
@@ -19,8 +18,8 @@ export const registerSocial = async (
   googleId: string | null,
   facebookId: string | null
 ) => {
-  const result = app.db
-    .insertInto("user_tbl")
+  const result = db
+    .insertInto("users")
     .values({
       email: email,
       name: name,
@@ -34,8 +33,8 @@ export const registerSocial = async (
 };
 
 export const login = async (email: string) => {
-  const result = app.db
-    .selectFrom("user_tbl")
+  const result = db
+    .selectFrom("users")
     .selectAll()
     .where("email", "=", email)
     .executeTakeFirst();
@@ -45,8 +44,8 @@ export const login = async (email: string) => {
 export const updateIsVerified = async (
   email: string
 ): Promise<UpdateResult> => {
-  const userUpdate = await app.db
-    .updateTable("user_tbl")
+  const userUpdate = await db
+    .updateTable("users")
     .set({
       is_verified: 1,
     })
@@ -58,8 +57,8 @@ export const updatePassword = async (
   email: string | undefined,
   password: string
 ) => {
-  const userUpdate = await app.db
-    .updateTable("user_tbl")
+  const userUpdate = await db
+    .updateTable("users")
     .set({
       password: password,
     })

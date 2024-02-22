@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const postbackSchema = z.object({
-  type: z.string(),
+  type: z.enum(["tasks", "surveys"]),
   network: z.string(),
   transaction_id: z.string(),
   user_id: z.number(),
@@ -13,3 +13,4 @@ export const postbackSchema = z.object({
   ikey: z.string(),
   hash: z.string(),
 });
+export type postbackQuerySchema = z.infer<typeof postbackSchema>;

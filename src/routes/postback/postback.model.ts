@@ -1,5 +1,6 @@
 import { sql } from "kysely";
 import app from "../../app";
+import { db } from "../../database/database";
 
 export const insertLog = async (
   network: string,
@@ -9,7 +10,7 @@ export const insertLog = async (
   status: "pending" | "processed" | "error",
   message: string
 ) => {
-  const result = await app.db
+  const result = await db
     .insertInto("offerwall_postback_logs")
     .values({
       network: network,
@@ -38,7 +39,7 @@ export const insert = async (
   extra_info: object,
   mail_sent: number
 ) => {
-  const result = await app.db
+  const result = await db
     .insertInto("user_offerwall_sales")
     .values({
       network: network,

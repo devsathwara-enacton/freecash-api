@@ -1,8 +1,8 @@
 import { sql } from "kysely";
-import app from "../../app";
+import { db } from "../../database/database";
 
 export const fetch = async (type: "tasks" | "surveys", name: string) => {
-  const result = app.db
+  const result = db
     .selectFrom("offerwall_networks")
     .selectAll()
     .where("type", "=", type)

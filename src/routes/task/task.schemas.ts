@@ -56,6 +56,7 @@ export const fetchTaskResponseSchema = z.object({
 export const fetchTaskQuerySchema = z.object({
   countries: z.string().optional(),
   page_number: z.number().default(1),
+  limit: z.number(),
   platform: z.string().optional(),
   featured: z.boolean().default(false),
   network: z.string().optional(),

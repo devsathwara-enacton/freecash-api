@@ -1,5 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import * as task from "./task.model";
+import { FetchTaskQuery } from "./task.schemas";
 
 export const fetch = async (req: FastifyRequest, reply: FastifyReply) => {
   const {
@@ -10,26 +11,7 @@ export const fetch = async (req: FastifyRequest, reply: FastifyReply) => {
     featured,
     network,
     category,
-  } = req.query as {
-    countries: string;
-    page_number: number;
-    limit: number;
-    platform: string;
-    featured: boolean;
-    network: string;
-    category: number;
-  };
-
-  console.log(
-    countries,
-    page_number,
-    limit,
-    platform,
-    featured,
-    network,
-    category
-  );
-
+  } = req.query as FetchTaskQuery;
   const ArrPlat: string[] | null = platform ? platform.split(",") : null;
   const ArrCountry: string[] | null = countries ? countries.split(",") : null;
 

@@ -125,7 +125,7 @@ export interface UserOfferwallSales {
   user_id: number;
 }
 
-export interface UserTbl {
+export interface Users {
   created_at: Generated<Date | null>;
   email: string;
   facebookId: Generated<string | null>;
@@ -144,5 +144,5 @@ export interface DB {
   offerwall_task_goals: OfferwallTaskGoals;
   offerwall_tasks: OfferwallTasks;
   user_offerwall_sales: UserOfferwallSales;
-  user_tbl: UserTbl;
+  users: Users;
 }

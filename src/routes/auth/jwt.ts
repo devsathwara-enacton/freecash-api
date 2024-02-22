@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { config } from "../config/config";
+import { config } from "../../config/config";
 import { FastifyReply } from "fastify";
 
 const secret = config.env.app.secret;

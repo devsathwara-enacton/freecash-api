@@ -1,8 +1,8 @@
 import { sql } from "kysely";
-import app from "../../app";
+import { db } from "../../database/database";
 
 export const fetch = async () => {
-  const result = await app.db
+  const result = await db
     .selectFrom("offerwall_networks")
     .select(["id", "name", "code", "logo"])
     .execute();

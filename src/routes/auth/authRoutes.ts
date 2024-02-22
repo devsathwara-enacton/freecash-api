@@ -17,6 +17,9 @@ import {
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 
 export default async function (app: FastifyInstance) {
+  app.get("/example", (req: FastifyRequest, res: FastifyReply) => {
+    res.send("Example");
+  });
   app.withTypeProvider<FastifyTypeProviderDefault>().route({
     method: "GET",
     url: "/google",

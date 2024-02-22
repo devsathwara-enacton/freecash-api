@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import app from "../../app";
-
+import { postbackQuerySchema } from "./post.schema";
 import crypto from "crypto";
 import * as networks from "./networks.model";
 import * as postback from "./postback.model";
@@ -27,19 +27,7 @@ export const validate = async (req: FastifyRequest, reply: FastifyReply) => {
     network_goal_id,
     ikey,
     hash,
-  } = req.query as {
-    type: "tasks" | "surveys";
-    network: string;
-    transaction_id: string;
-    user_id: number;
-    offer_name: string;
-    offer_id: string;
-    amount: number;
-    payout: number;
-    network_goal_id: string;
-    ikey: string;
-    hash: string;
-  };
+  } = req.query as postbackQuerySchema;
   const data = {
     type: type,
     network: network,

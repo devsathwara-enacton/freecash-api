@@ -1,17 +1,17 @@
 import * as auth from "./auth.model";
 import { FastifyReply, FastifyRequest } from "fastify";
 import bcrypt from "bcrypt";
-import { createJWTToken, decodeToken } from "../../utils/jwt";
+import { createJWTToken, decodeToken } from "./jwt";
 import { sendEmail } from "../../utils/sendEmail";
 import { config } from "../../config/config";
+import {
+  forgotPasswordBodySchema,
+  loginBodySchema,
+  registerUserSchema,
+} from "./auth.schema";
 
-interface user {
-  name: string;
-  email: string;
-  password: string;
-}
 export const register = async (req: FastifyRequest, reply: FastifyReply) => {
-  const { name, email, password } = req.body as user;
+  const { name, email, password } = req.body as registerUserSchema;
   let hashPassword: string = await bcrypt.hash(password, 10);
   const userExist = await auth.login(email);
   if (userExist) {
@@ -52,7 +52,7 @@ export const register = async (req: FastifyRequest, reply: FastifyReply) => {
   }
 };
 export const login = async (req: FastifyRequest, reply: FastifyReply) => {
-  const { email, password } = req.body as { email: string; password: string };
+  const { email, password } = req.body as loginBodySchema;
   const userData = await auth.login(email);
   if (!userData) {
     return reply
@@ -131,9 +131,7 @@ export const forgotPassword = async (
   req: FastifyRequest,
   reply: FastifyReply
 ): Promise<any> => {
-  const { email } = req.body as unknown as {
-    email: string;
-  };
+  const { email } = req.body as forgotPasswordBodySchema;
   const user = await auth.login(email);
   if (!user) {
     return reply.status(404).send({

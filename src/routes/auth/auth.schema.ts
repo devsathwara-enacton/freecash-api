@@ -13,6 +13,7 @@ export const emailSchema = z.object({
       message: "Email is required",
     }),
 });
+export type forgotPasswordBodySchema = z.infer<typeof emailSchema>;
 export const loginSchema = z.object({
   email: z
     .string()
@@ -46,3 +47,5 @@ export const registerUserSchema = z.object({
       }
     ),
 });
+export type loginBodySchema = z.infer<typeof loginSchema>;
+export type registerUserSchema = z.infer<typeof registerUserSchema>;
