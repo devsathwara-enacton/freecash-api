@@ -59,11 +59,10 @@ const createApp = (): CustomFastifyInstance => {
     cookieName: config.env.app.cookieName,
     cookie: {
       path: "/",
-      httpOnly: false,
+      httpOnly: true,
       expires: new Date(Date.now() + 3600000),
       sameSite: "none",
       secure: true,
-      // domain: ".enactweb.com",
     },
   });
   // app.register(require("@fastify/flash"));

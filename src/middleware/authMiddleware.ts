@@ -4,19 +4,19 @@ import * as auth from "../routes/auth/auth.model";
 
 export const isAuthenticated = async (
   req: FastifyRequest,
-  reply: FastifyReply,
-  done: () => void
+  reply: FastifyReply
 ) => {
   const accessToken = req.cookies.accessToken;
   if (!accessToken) {
-    return reply.status(401).send({ error: "Not authenticated" });
+    reply.status(401).send({ error: "Not authenticated" });
+    return; // Stop execution to prevent calling the next handler
   }
-  const decoded = decodeToken(reply, accessToken);
+  const decoded = await decodeToken(reply, accessToken);
   const userExist = await auth.login(decoded.email);
-  console.log("Access Token:", accessToken);
   if (!userExist) {
-    return reply.status(403).send({ error: "User not found" });
-  } else {
-    done();
+    reply.status(404).send({ error: "User Not Found" });
+    return; // Stop execution to prevent calling the next handler
   }
+  // If the function reaches this point, the user is authenticated,
+  // and you don't need to explicitly call done or return anything.
 };

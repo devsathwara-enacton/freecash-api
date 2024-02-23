@@ -137,6 +137,40 @@ export interface Users {
   updated_at: Generated<Date | null>;
 }
 
+export interface UserTaskClicks {
+  campaign_id: string;
+  clicked_on: Generated<Date>;
+  countries: string;
+  id: Generated<number>;
+  locale: string;
+  network: string;
+  platform: string;
+  Referer: string;
+  task_offer_id: Generated<string | null>;
+  task_type: string;
+  user_agent: string;
+  user_id: number;
+}
+
+export interface UserTasks {
+  amount: Decimal;
+  created_at: Generated<Date | null>;
+  extra_info: Generated<string | null>;
+  id: Generated<number>;
+  mail_sent: Generated<number>;
+  network: string;
+  network_goal_id: Generated<string | null>;
+  offer_id: string;
+  payout: Decimal;
+  status: Generated<"confirmed" | "declined" | "pending">;
+  task_name: string;
+  task_offer_id: Generated<string | null>;
+  task_type: string;
+  transaction_id: string;
+  updated_at: Generated<Date | null>;
+  user_id: number;
+}
+
 export interface DB {
   offerwall_categories: OfferwallCategories;
   offerwall_networks: OfferwallNetworks;
@@ -144,5 +178,7 @@ export interface DB {
   offerwall_task_goals: OfferwallTaskGoals;
   offerwall_tasks: OfferwallTasks;
   user_offerwall_sales: UserOfferwallSales;
+  user_task_clicks: UserTaskClicks;
+  user_tasks: UserTasks;
   users: Users;
 }

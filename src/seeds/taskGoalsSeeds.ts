@@ -1,34 +1,33 @@
-import { db } from "../database/database"; // Import your configured Kysely database instance
+import { db } from "../database/database";
+import { faker } from "@faker-js/faker";
 
-async function seedTasks() {
-  const data = [
-    {
-      network: "Sample Network",
-      task_offer_id: "sample_offer_1",
-      network_task_id: "sample_campaign_1",
-      network_goal_id: "sample_goal_1",
-      network_goal_name: "Sample Goal 1",
-      name: "Sample Task 1",
-      description: "This is a sample description for task 1",
-      image: "/uploads/images/sample_image_1.jpg",
-      cashback: 10.5,
-      revenue: 20.75,
-      status: "publish" as const,
-      is_translated: 0,
-      created_at: new Date(),
-      updated_at: new Date(),
-    },
-    // Add more data objects as needed
-  ];
+async function seedTaskGoals() {
+  const goals = Array.from({ length: 10 }).map(() => ({
+    network: faker.company.name(),
+    task_offer_id: faker.random.alphaNumeric(10),
+    network_task_id: faker.random.alphaNumeric(10),
+    network_goal_id: faker.random.alphaNumeric(10),
+    network_goal_name: faker.commerce.productName(),
+    name: faker.commerce.productName(),
+    description: faker.commerce.productDescription(),
+    image: `/uploads/images/${faker.system.fileName()}`,
+    cashback: faker.datatype.float({ min: 1, max: 50 }),
+    revenue: faker.datatype.float({ min: 1, max: 100 }),
+    status: faker.helpers.enumValue({
+      publish: "publish",
+      paused: "paused",
+    }) as any,
+    is_translated: faker.datatype.number({ min: 0, max: 1 }),
+  }));
 
-  await db.insertInto("offerwall_task_goals").values(data).execute();
+  await db.insertInto("offerwall_task_goals").values(goals).execute();
 
-  console.log("Offerwall networks seeded successfully.");
+  console.log("Task goals seeded");
 }
 
 async function main() {
   try {
-    await seedTasks();
+    await seedTaskGoals();
   } catch (error) {
     console.error("Failed to seed offerwall networks:", error);
   } finally {

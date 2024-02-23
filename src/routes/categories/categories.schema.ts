@@ -2,19 +2,19 @@ import { z } from "zod";
 
 export const categoryItemSchema = z.object({
   id: z.number(),
-  name: z.string(),
-  icon: z.string(),
-  bg_color: z.string(),
-  sort_order: z.number(),
+  name: z.string().nullable(),
+  icon: z.string().nullable(),
+  bg_color: z.string().nullable(),
+  sort_order: z.number().nullable(),
 });
 
 export const categoriesSchema = z.array(categoryItemSchema);
 
 export const fetchCategoryResponseSchema = z.object({
-  success: z.boolean(),
+  success: z.string(),
   data: z.object({
-    Categories: categoriesSchema,
+    Categories: categoryItemSchema,
   }),
-  error: z.number(),
+  error: z.string().nullable(),
   msg: z.string().nullable(),
 });

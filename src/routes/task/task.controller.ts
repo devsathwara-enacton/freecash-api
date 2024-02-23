@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import * as task from "./task.model";
-import { FetchTaskQuery } from "./task.schemas";
+import { ClickTaskQuery, FetchTaskQuery } from "./task.schemas";
+import { decodeToken } from "../auth/jwt";
 
 export const fetch = async (req: FastifyRequest, reply: FastifyReply) => {
   const {
@@ -25,11 +26,7 @@ export const fetch = async (req: FastifyRequest, reply: FastifyReply) => {
     category || null
   );
 
-  if (!result) {
-    return reply.status(404).send({
-      error: "Not Found",
-    });
-  } else {
+  if (result != null) {
     // Added type assertion to result to allow .map()
     const tasks = result.map((task: any) => ({
       name: task.Name ? JSON.parse(task.Name)?.en || null : null,
@@ -66,13 +63,51 @@ export const fetch = async (req: FastifyRequest, reply: FastifyReply) => {
       },
     }));
 
-    return reply.send({
-      success: 1,
+    return reply.status(200).send({
+      success: "true",
       data: {
         tasks: tasks,
       },
+      error: "null",
+      msg: "null",
+    });
+  } else {
+    return reply.status(404).send({
+      error: "Not Found",
+    });
+  }
+};
+export const clickInsert = async (req: FastifyRequest, reply: FastifyReply) => {
+  const { platform, network, task_type, campaign_id } =
+    req.query as ClickTaskQuery;
+  const { accessToken } = req.cookies;
+  const locale = req.headers["accept-language"] || ("en" as string);
+  const userAgent = req.headers["user-agent"] as string;
+  const referer = req.headers.referer as string;
+  const countries = req.headers.countries as string;
+  const decoded = await decodeToken(reply, accessToken);
+  const result = await task.clickInsert(
+    decoded.id,
+    platform,
+    network,
+    task_type,
+    network + campaign_id,
+    campaign_id,
+    locale,
+    countries,
+    userAgent,
+    referer
+  );
+  if (result) {
+    return reply.status(201).send({
+      success: 1,
+      message: "Inserted SuccessFull",
       error: 0,
       msg: null,
+    });
+  } else {
+    return reply.status(500).send({
+      error: "Error",
     });
   }
 };

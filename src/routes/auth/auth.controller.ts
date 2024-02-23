@@ -78,7 +78,7 @@ export const login = async (req: FastifyRequest, reply: FastifyReply) => {
         });
       } else {
         let newAccessToken = await createJWTToken(
-          { name: userData.name, email: userData.email },
+          { name: userData.name, email: userData.email, id: userData.id },
           `${parseInt(config.env.app.expiresIn)}h`
         );
         //Encrpted session
@@ -89,7 +89,7 @@ export const login = async (req: FastifyRequest, reply: FastifyReply) => {
           expires: new Date(Date.now() + 86400000),
           sameSite: "none",
           secure: true,
-          domain: ".enactweb.com",
+          // domain: ".enactweb.com",
         });
         return reply.status(200).send({
           success: true,

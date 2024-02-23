@@ -1,23 +1,20 @@
-import { db } from "../database/database"; // Ensure you import your configured Kysely database instance
+import { db } from "../database/database";
+import { faker } from "@faker-js/faker";
 
 async function seedOfferwallCategories() {
-  const categories = [
-    {
-      name: "Category 1",
-      icon: "/path/to/icon1.png", // assuming you have predefined icons
-      banner_img: "/path/to/banner1.png",
-      is_featured: 1,
-      sort_order: 100,
-      fg_color: "#FFFFFF",
-      bg_color: "#000000",
-      mapping_for: "tasks",
-      match_keywords: "keyword1, keyword2",
-      match_order: 100,
-      item_count: 10,
-      // created_at and updated_at can be omitted to use the default CURRENT_TIMESTAMP
-    },
-    // Add more category objects as needed
-  ];
+  const categories = Array.from({ length: 1 }).map(() => ({
+    name: faker.commerce.department(),
+    icon: `/uploads/images/categories/${faker.system.fileName()}.png`,
+    banner_img: `/uploads/images/categories/${faker.system.fileName()}.png`,
+    is_featured: faker.datatype.number({ min: 0, max: 1 }),
+    sort_order: faker.datatype.number(),
+    fg_color: faker.internet.color(),
+    bg_color: faker.internet.color(),
+    mapping_for: faker.helpers.arrayElement(["tasks", "surveys"]),
+    match_keywords: faker.random.words(3).toString(),
+    match_order: faker.datatype.number(),
+    item_count: faker.datatype.number(),
+  }));
 
   await db.insertInto("offerwall_categories").values(categories).execute();
 
@@ -27,10 +24,11 @@ async function seedOfferwallCategories() {
 async function main() {
   try {
     await seedOfferwallCategories();
+    console.log("object");
   } catch (error) {
     console.error("Failed to seed offerwall categories:", error);
   } finally {
-    await db.destroy(); // Close the database connection properly
+    await db.destroy();
   }
 }
 

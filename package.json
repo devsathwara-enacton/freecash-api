@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon server.ts",
-    "db:codegen": "npx kysely-codegen --out-file ./src/database/db.d.ts"
+    "db:codegen": "npx kysely-codegen --out-file ./src/database/db.d.ts  npx kysely-codegen"
   },
   "keywords": [],
   "author": "",

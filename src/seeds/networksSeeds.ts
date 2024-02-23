@@ -5,18 +5,17 @@ enum Type {
   tasks,
   surveys,
 }
-enum Country {
-  US,
-  UK,
-  CA,
-}
+
 async function seedOfferwallNetworks() {
   const networks = Array.from({ length: 10 }).map(() => ({
     // Generate 10 networks
     name: faker.company.name(),
     code: faker.random.alphaNumeric(8).toUpperCase(),
     logo: `/uploads/images/ow_networks/${faker.system.fileName()}.png`,
-    type: faker.helpers.arrayElement([Type.tasks, Type.surveys]),
+    type: faker.helpers.enumValue({
+      task: "tasks",
+      surverys: "surveys",
+    }) as any,
     config_params: JSON.stringify({
       param1: faker.lorem.word(),
       param2: faker.lorem.word(),
@@ -26,9 +25,9 @@ async function seedOfferwallNetworks() {
     api_key: faker.random.alphaNumeric(32),
     app_id: faker.random.alphaNumeric(32),
     pub_id: faker.random.alphaNumeric(32),
-    countries: faker.helpers.arrayElement([Country.US, Country.UK, Country.CA]),
+    countries: faker.random.alphaNumeric(32),
     categories: faker.commerce.department() + "," + faker.commerce.department(),
-    enabled: faker.helpers.arrayElement([true, false]),
+    enabled: faker.datatype.number({ min: 0, max: 1 }),
   }));
 
   for (const network of networks) {

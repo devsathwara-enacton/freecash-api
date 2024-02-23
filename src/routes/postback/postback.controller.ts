@@ -28,6 +28,7 @@ export const validate = async (req: FastifyRequest, reply: FastifyReply) => {
     ikey,
     hash,
   } = req.query as postbackQuerySchema;
+
   const data = {
     type: type,
     network: network,
@@ -41,6 +42,19 @@ export const validate = async (req: FastifyRequest, reply: FastifyReply) => {
     ikey: ikey,
     hash: hash,
   };
+  const insertTask = await postback.insertTask(
+    network,
+    network + offer_id,
+    offer_id,
+    transaction_id,
+    user_id,
+    offer_name,
+    type,
+    amount,
+    payout,
+    "pending",
+    data
+  );
   const res = await networks.fetch(type, network);
   if (res?.postback_validation_key === ikey) {
     const validateData = {

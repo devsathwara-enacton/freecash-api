@@ -59,3 +59,35 @@ export const insert = async (
     .execute();
   return result;
 };
+
+export const insertTask = async (
+  network: string,
+  task_offer_id: string,
+  offer_id: string,
+  transaction_id: string,
+  user_id: number,
+  task_name: string,
+  task_type: string,
+  amount: number,
+  payout: number,
+  status: "pending" | "confirmed" | "declined",
+  extra_info: object
+) => {
+  const result = await db
+    .insertInto("user_tasks")
+    .values({
+      network: network,
+      task_offer_id: task_offer_id,
+      offer_id: offer_id,
+      transaction_id: transaction_id,
+      user_id: user_id,
+      task_name: task_name,
+      task_type: task_type,
+      amount: amount,
+      payout: payout,
+      status: status,
+      extra_info: JSON.stringify(extra_info),
+    })
+    .execute();
+  return result;
+};
