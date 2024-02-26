@@ -5,16 +5,11 @@ import fastify, {
 } from "fastify";
 import { join } from "path";
 import autoload from "@fastify/autoload";
-import { Kysely } from "kysely";
-import { DB } from "kysely-codegen/dist/db";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 import {
-  jsonSchemaTransform,
-  createJsonSchemaTransform,
   serializerCompiler,
   validatorCompiler,
-  ZodTypeProvider,
 } from "fastify-type-provider-zod";
 import fastifyCookie from "@fastify/cookie";
 import fastifySecureSession from "@fastify/secure-session";
@@ -22,19 +17,13 @@ import fastifyPassport from "@fastify/passport";
 import "./routes/auth/passport";
 import cors from "@fastify/cors";
 import { config } from "./config/config";
-import axios from "axios";
-import {
-  createJWTToken,
-  decodeToken,
-  validateJWTToken,
-} from "./routes/auth/jwt";
-import { db } from "./database/database";
+import { createJWTToken } from "./routes/auth/jwt";
+import redisPlugin from "./service/redis";
 import { swaggerOptions, swaggerUiOptions } from "./utils/swagger";
-interface CustomFastifyInstance extends FastifyInstance {}
+import { db } from "./database/database";
 
-const createApp = (): CustomFastifyInstance => {
-  const app = fastify({ logger: true }) as unknown as CustomFastifyInstance;
-
+const createApp = (): FastifyInstance => {
+  const app = fastify({ logger: true }) as FastifyInstance;
   const sessionSecret = config.env.app.sessionSecret?.toString();
   if (!sessionSecret) {
     throw new Error("Session secret is not defined in the config");
@@ -73,11 +62,16 @@ const createApp = (): CustomFastifyInstance => {
 
   app.register(fastifySwagger, swaggerOptions);
   app.register(fastifySwaggerUi, swaggerUiOptions);
+  redisPlugin(app, { url: "redis://127.0.0.1:6379" });
 
   // Register autoload for routes
   app.register(autoload, {
     dir: join(__dirname, "routes"),
     options: { prefix: "/api/v1" }, // Use a prefix for all routes
+  });
+  const data = db.selectFrom("settings").selectAll().execute();
+  data.then((res: any) => {
+    app.redis.set("settings", JSON.stringify(res));
   });
   // app.get(
   //   "/google/auth",
@@ -135,5 +129,8 @@ const createApp = (): CustomFastifyInstance => {
   );
   return app;
 };
-const app: CustomFastifyInstance = createApp();
+
+// Call the function with the Redis instance
+const app: FastifyInstance = createApp();
+
 export default app;

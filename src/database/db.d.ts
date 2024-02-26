@@ -106,6 +106,15 @@ export interface OfferwallTasks {
   url: string;
 }
 
+export interface Settings {
+  created_at: Generated<Date | null>;
+  group: Generated<string>;
+  id: Generated<number>;
+  name: string;
+  updated_at: Generated<Date | null>;
+  val: Generated<string | null>;
+}
+
 export interface UserOfferwallSales {
   amount: Decimal;
   created_at: Generated<Date | null>;
@@ -177,6 +186,7 @@ export interface DB {
   offerwall_postback_logs: OfferwallPostbackLogs;
   offerwall_task_goals: OfferwallTaskGoals;
   offerwall_tasks: OfferwallTasks;
+  settings: Settings;
   user_offerwall_sales: UserOfferwallSales;
   user_task_clicks: UserTaskClicks;
   user_tasks: UserTasks;
