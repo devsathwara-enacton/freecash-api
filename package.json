@@ -8,7 +8,7 @@
     "dev": "nodemon server.ts",
     "db:codegen": "npx kysely-codegen --out-file ./src/database/db.d.ts npx kysely-codegen",
     "db:migration": "ts-node src/database/migration/runMigrations.ts",
-    "migration:file":"ts-node src/database/createMigrationFile.ts"
+    "migration:file": "ts-node src/database/createMigrationFile.ts"
   },
   "keywords": [],
   "author": "",
