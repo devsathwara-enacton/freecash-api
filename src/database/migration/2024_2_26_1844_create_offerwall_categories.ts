@@ -1,4 +1,4 @@
-import { Kysely } from "kysely";
+import { Kysely, sql } from "kysely";
 
 export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
@@ -9,24 +9,39 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn("name", "varchar(255)", (col) => col.notNull())
     .addColumn("icon", "varchar(255)", (col) => col.notNull())
     .addColumn("banner_img", "varchar(255)", (col) => col.notNull())
-    .addColumn("is_featured", "boolean", (col) => col.notNull().defaultTo(0))
+    .addColumn("is_featured", "boolean", (col) =>
+      col.notNull().defaultTo(sql<any>`0`)
+    )
     .addColumn("sort_order", "integer", (col) =>
-      col.unsigned().notNull().defaultTo(100)
+      col
+        .unsigned()
+        .notNull()
+        .defaultTo(sql<any>`100`)
     )
     .addColumn("fg_color", "varchar(255)", (col) => col.notNull())
     .addColumn("bg_color", "varchar(255)", (col) => col.notNull())
     .addColumn("mapping_for", "varchar(255)", (col) =>
-      col.notNull().defaultTo("tasks")
+      col.notNull().defaultTo(sql<any>`tasks`)
     )
     .addColumn("match_keywords", "varchar(1000)", (col) => col.notNull())
     .addColumn("match_order", "integer", (col) =>
-      col.unsigned().notNull().defaultTo(100)
+      col
+        .unsigned()
+        .notNull()
+        .defaultTo(sql<any>`100`)
     )
     .addColumn("item_count", "integer", (col) =>
-      col.unsigned().notNull().defaultTo(0)
+      col
+        .unsigned()
+        .notNull()
+        .defaultTo(sql<any>`0`)
     )
-    .addColumn("created_at", "timestamp", (col) => col.notNull())
-    .addColumn("updated_at", "timestamp", (col) => col.notNull())
+    .addColumn("created_at", "timestamp", (col) =>
+      col.notNull().defaultTo(sql<any>`CURRENT_TIMESTAMP`)
+    )
+    .addColumn("updated_at", "timestamp", (col) =>
+      col.notNull().defaultTo(sql<any>`CURRENT_TIMESTAMP`)
+    )
     .execute();
 }
 

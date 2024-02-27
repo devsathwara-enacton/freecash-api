@@ -1,4 +1,4 @@
-import { Kysely } from "kysely";
+import { Kysely, sql } from "kysely";
 
 export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
@@ -20,10 +20,10 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn("extra_info", "text", (col) => col.notNull())
     .addColumn("mail_sent", "boolean", (col) => col.notNull().defaultTo(false))
     .addColumn("created_at", "timestamp", (col) =>
-      col.defaultTo("CURRENT_TIMESTAMP")
+      col.defaultTo(sql<any>`CURRENT_TIMESTAMP`)
     )
     .addColumn("updated_at", "timestamp", (col) =>
-      col.defaultTo("CURRENT_TIMESTAMP")
+      col.defaultTo(sql<any>`CURRENT_TIMESTAMP`)
     )
     .execute();
 }

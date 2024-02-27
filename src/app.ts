@@ -132,5 +132,4 @@ const createApp = (): FastifyInstance => {
 
 // Call the function with the Redis instance
 const app: FastifyInstance = createApp();
-
 export default app;

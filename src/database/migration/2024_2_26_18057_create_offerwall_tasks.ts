@@ -1,4 +1,4 @@
-import { Kysely } from "kysely";
+import { Kysely, sql } from "kysely";
 
 export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
@@ -15,7 +15,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn("instructions", "text", (col) => col.notNull())
     .addColumn("image", "varchar(255)", (col) => col.notNull())
     .addColumn("url", "varchar(2500)", (col) => col.notNull())
-    .addColumn("payout", "decimal", (col) => col.defaultTo("0.00"))
+    .addColumn("payout", "decimal", (col) => col.defaultTo(sql<any>`0.00`))
     .addColumn("countries", "text", (col) => col.notNull())
     .addColumn("devices", "text", (col) => col.notNull())
     .addColumn("platforms", "text", (col) => col.notNull())
@@ -29,19 +29,38 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn("network_categories", "text", (col) => col.notNull())
     .addColumn("network_goals", "text", (col) => col.notNull())
     .addColumn("redemptions", "integer", (col) =>
-      col.unsigned().notNull().defaultTo(0)
+      col
+        .unsigned()
+        .notNull()
+        .defaultTo(sql<any>`0`)
     )
     .addColumn("clicks", "integer", (col) =>
-      col.unsigned().notNull().defaultTo(0)
+      col
+        .unsigned()
+        .notNull()
+        .defaultTo(sql<any>`0`)
     )
-    .addColumn("status", "varchar", (col) => col.notNull().defaultTo("publish"))
-    .addColumn("is_translated", "boolean", (col) => col.notNull().defaultTo(0))
-    .addColumn("is_featured", "boolean", (col) => col.notNull().defaultTo(0))
+    .addColumn("status", sql<any>`ENUM('publish', 'draft', 'trash')`, (col) =>
+      col.notNull().defaultTo(sql<any>`'publish'`)
+    )
+    .addColumn("is_translated", "boolean", (col) =>
+      col.notNull().defaultTo(sql<any>`0`)
+    )
+    .addColumn("is_featured", "boolean", (col) =>
+      col.notNull().defaultTo(sql<any>`0`)
+    )
     .addColumn("goals_count", "integer", (col) =>
-      col.unsigned().notNull().defaultTo(1)
+      col
+        .unsigned()
+        .notNull()
+        .defaultTo(sql<any>`1`)
     )
-    .addColumn("created_at", "timestamp", (col) => col.notNull())
-    .addColumn("updated_at", "timestamp", (col) => col.notNull())
+    .addColumn("created_at", "timestamp", (col) =>
+      col.notNull().defaultTo(sql<any>`CURRENT_TIMESTAMP`)
+    )
+    .addColumn("updated_at", "timestamp", (col) =>
+      col.notNull().defaultTo(sql<any>`CURRENT_TIMESTAMP`)
+    )
     .execute();
 }
 
