@@ -45,13 +45,13 @@ async function generateMigrationCode(tableName: string) {
     }
     if (DATA_TYPE === "enum") {
       if (constraints.length > 0) {
-        migrationUpCode += `    .addColumn("${COLUMN_NAME}", sql<any>\`${DATA_TYPE}\`, ${
+        migrationUpCode += `    .addColumn("${COLUMN_NAME}", sql<any>\`${COLUMN_TYPE}\`, ${
           constraints.length > 0
             ? `(col) => col.${constraints.join(".")}`
             : "null"
         })\n`;
       } else {
-        migrationUpCode += `    .addColumn("${COLUMN_NAME}", "${DATA_TYPE}")\n`;
+        migrationUpCode += `    .addColumn("${COLUMN_NAME}", "${COLUMN_TYPE}")\n`;
       }
     }
     if (DATA_TYPE === "longtext") {
@@ -62,7 +62,7 @@ async function generateMigrationCode(tableName: string) {
             : "null"
         })\n`;
       } else {
-        migrationUpCode += `    .addColumn("${COLUMN_NAME}", "${DATA_TYPE}")\n`;
+        migrationUpCode += `    .addColumn("${COLUMN_NAME}", sql<any>\`${DATA_TYPE}\`)\n`;
       }
     }
     // Mapping SQL data types to Kysely data types

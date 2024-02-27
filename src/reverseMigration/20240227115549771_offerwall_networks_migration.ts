@@ -8,7 +8,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn("logo", "text")
     .addColumn("type", sql<any>`enum`, (col) => col.notNull())
     .addColumn("type", "text", (col) => col.notNull())
-    .addColumn("config_params", "longtext")
+    .addColumn("config_params", sql<any>`longtext`)
     .addColumn("config_params", "text")
     .addColumn("postback_validation_key", "text")
     .addColumn("postback_key", "text")
