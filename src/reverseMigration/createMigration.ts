@@ -9,9 +9,26 @@ async function generateMigrationCode(tableName: string, schemaName: string) {
         FROM INFORMATION_SCHEMA.COLUMNS
         WHERE TABLE_NAME = ${tableName} AND TABLE_SCHEMA = ${schemaName}
     `.execute(db);
+  const constraintsData = await sql<any>`SELECT 
+  kcu.CONSTRAINT_NAME,
+  kcu.COLUMN_NAME,
+  kcu.REFERENCED_TABLE_NAME,
+  kcu.REFERENCED_COLUMN_NAME,
+  rc.UPDATE_RULE,
+  rc.DELETE_RULE
+FROM 
+  INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS kcu
+JOIN 
+  INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS rc
+ON 
+  kcu.CONSTRAINT_NAME = rc.CONSTRAINT_NAME
+WHERE 
+  kcu.TABLE_NAME = 'offerwall_tasks' 
+  AND kcu.TABLE_SCHEMA = 'laraback10_enactweb'
+  AND kcu.REFERENCED_TABLE_NAME IS NOT NULL;`.execute(db);
   const schema = schemaResult.rows;
   let migrationUpCode = `import { Kysely, sql } from "kysely";\n\nexport async function up(db: Kysely<any>): Promise<void> {\n  await db.schema.createTable("${tableName}")\n`;
-  let migrationDownCode = `export async function down(db: Kysely<any>): Promise<void> {\n  await db.schema.dropTable("${tableName}").execute();\n}`;
+  let migrationDownCode = `export async function down(db: Kysely<any>): Promise<void> {\n  await db.schema.dropTable("${tableName}")`;
 
   schema.forEach((column) => {
     const {
@@ -23,7 +40,7 @@ async function generateMigrationCode(tableName: string, schemaName: string) {
       COLUMN_KEY,
       EXTRA,
     } = column;
-    console.log(COLUMN_TYPE);
+
     let constraints = [];
 
     // Primary Key
@@ -94,9 +111,23 @@ async function generateMigrationCode(tableName: string, schemaName: string) {
         migrationUpCode += `    .addColumn("${COLUMN_NAME}", "${kyselyType}")\n`;
       }
     }
+    constraintsData.rows.forEach((constraint) => {
+      if (COLUMN_NAME == constraint.COLUMN_NAME) {
+        migrationUpCode += `.addForeignKeyConstraint("${constraint.CONSTRAINT_NAME}", ["${constraint.COLUMN_NAME}"], "${constraint.REFERENCED_TABLE_NAME}", ["${constraint.REFERENCED_COLUMN_NAME}"]`;
+        if (constraint.UPDATE_RULE) {
+          migrationUpCode += `,(cb: any) =>
+            cb.onUpdate('${constraint.UPDATE_RULE.toLowerCase()}')`;
+          if (constraint.DELETE_RULE) {
+            migrationUpCode += `.onDelete('${constraint.DELETE_RULE.toLowerCase()}')`;
+          }
+        }
+        migrationUpCode += ")\n";
+      }
+    });
   });
 
   migrationUpCode += "    .execute();\n}\n\n";
+  migrationDownCode += ".execute();\n}";
 
   const timestamp = new Date().toISOString().replace(/[^0-9]/g, "");
   // Optionally, write the generated code to files
@@ -118,7 +149,6 @@ function mapSqlTypeToKysely(sqlType: any): string {
       return "boolean"; // Assuming tinyint(1) is used for boolean
     case "timestamp":
       return "timestamp";
-
     default:
       return "text"; // Default fallback, adjust as needed
   }
