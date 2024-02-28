@@ -3,14 +3,13 @@ import fs from "fs";
 import path from "path";
 import { db } from "../database/database";
 
-async function generateMigrationCode(tableName: string) {
+async function generateMigrationCode(tableName: string, schemaName: string) {
   const schemaResult = await sql<any>`
         SELECT COLUMN_NAME,COLUMN_TYPE, DATA_TYPE, IS_NULLABLE, COLUMN_DEFAULT, COLUMN_KEY, EXTRA
         FROM INFORMATION_SCHEMA.COLUMNS
-        WHERE TABLE_NAME = ${tableName} AND TABLE_SCHEMA = "laraback10_enactweb" 
+        WHERE TABLE_NAME = ${tableName} AND TABLE_SCHEMA = ${schemaName}
     `.execute(db);
   const schema = schemaResult.rows;
-
   let migrationUpCode = `import { Kysely, sql } from "kysely";\n\nexport async function up(db: Kysely<any>): Promise<void> {\n  await db.schema.createTable("${tableName}")\n`;
   let migrationDownCode = `export async function down(db: Kysely<any>): Promise<void> {\n  await db.schema.dropTable("${tableName}").execute();\n}`;
 
@@ -43,9 +42,23 @@ async function generateMigrationCode(tableName: string) {
         constraints.push(`defaultTo(sql<any>\`${COLUMN_DEFAULT}\`)`);
       }
     }
-    if (DATA_TYPE === "enum") {
+
+    if (DATA_TYPE == "varchar") {
       if (constraints.length > 0) {
         migrationUpCode += `    .addColumn("${COLUMN_NAME}", sql<any>\`${COLUMN_TYPE}\`, ${
+          constraints.length > 0
+            ? `(col) => col.${constraints.join(".")}`
+            : "null"
+        })\n`;
+      } else {
+        migrationUpCode += `    .addColumn("${COLUMN_NAME}", sql<any>\`${COLUMN_TYPE}\`)\n`;
+      }
+    }
+
+    if (DATA_TYPE === "enum") {
+      console.log(COLUMN_TYPE);
+      if (constraints.length > 0) {
+        migrationUpCode += `.addColumn("${COLUMN_NAME}", sql<any>\`${COLUMN_TYPE}\`, ${
           constraints.length > 0
             ? `(col) => col.${constraints.join(".")}`
             : "null"
@@ -65,14 +78,21 @@ async function generateMigrationCode(tableName: string) {
         migrationUpCode += `    .addColumn("${COLUMN_NAME}", sql<any>\`${DATA_TYPE}\`)\n`;
       }
     }
-    // Mapping SQL data types to Kysely data types
-    let kyselyType = mapSqlTypeToKysely(DATA_TYPE);
-    if (constraints.length > 0) {
-      migrationUpCode += `    .addColumn("${COLUMN_NAME}", "${kyselyType}", (col) => col.${constraints.join(
-        "."
-      )})\n`;
-    } else {
-      migrationUpCode += `    .addColumn("${COLUMN_NAME}", "${kyselyType}")\n`;
+
+    if (
+      DATA_TYPE !== "enum" &&
+      DATA_TYPE !== "longtext" &&
+      DATA_TYPE !== "varchar"
+    ) {
+      // Mapping SQL data types to Kysely data types
+      let kyselyType = mapSqlTypeToKysely(DATA_TYPE);
+      if (constraints.length > 0) {
+        migrationUpCode += `    .addColumn("${COLUMN_NAME}", "${kyselyType}", (col) => col.${constraints.join(
+          "."
+        )})\n`;
+      } else {
+        migrationUpCode += `    .addColumn("${COLUMN_NAME}", "${kyselyType}")\n`;
+      }
     }
   });
 
@@ -96,17 +116,13 @@ function mapSqlTypeToKysely(sqlType: any): string {
       return "integer";
     case "tinyint":
       return "boolean"; // Assuming tinyint(1) is used for boolean
-    case "varchar":
-    case "text":
-      return "text";
     case "timestamp":
       return "timestamp";
-    case "varchar":
-      return "varchar";
+
     default:
       return "text"; // Default fallback, adjust as needed
   }
 }
 
 // Call the function with your table name
-generateMigrationCode(process.argv[2]);
+generateMigrationCode(process.argv[2], process.argv[3]);

@@ -20,7 +20,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn("mapping_for", "text", (col) =>
       col.notNull().defaultTo(sql<any>`'tasks'`)
     )
-    .addColumn("match_keywords", "varchar(1000)", (col) => col.notNull())
+    .addColumn("match_keywords", "text", (col) => col.notNull())
     .addColumn("match_order", "integer", (col) =>
       col.notNull().defaultTo(sql<any>`100`)
     )
@@ -28,10 +28,10 @@ export async function up(db: Kysely<any>): Promise<void> {
       col.notNull().defaultTo(sql<any>`0`)
     )
     .addColumn("created_at", "timestamp", (col) =>
-      col.notNull().defaultTo(sql<any>`CURRENT_TIMESTAMP`)
+      col.defaultTo(sql<any>`CURRENT_TIMESTAMP`)
     )
     .addColumn("updated_at", "timestamp", (col) =>
-      col.notNull().defaultTo(sql<any>`CURRENT_TIMESTAMP`)
+      col.defaultTo(sql<any>`CURRENT_TIMESTAMP`)
     )
     .execute();
 }

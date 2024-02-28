@@ -1,16 +1,12 @@
 import { Kysely, sql } from "kysely";
 
 export async function up(db: Kysely<any>): Promise<void> {
-  await db.schema
-    .createTable("translations")
-    .addColumn("id", "bigint", (col) =>
-      col.primaryKey().autoIncrement().notNull()
-    )
+  await db.schema.createTable("translations")
+    .addColumn("id", "bigint", (col) => col.primaryKey().autoIncrement().notNull())
     .addColumn("page", "text", (col) => col.notNull())
     .addColumn("module", "text")
     .addColumn("trans_key", "text", (col) => col.notNull())
     .addColumn("trans_value", sql<any>`longtext`)
-    .addColumn("trans_value", "text")
     .execute();
 }
 

@@ -12,9 +12,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn("network_goal_id", "text", (col) => col.notNull())
     .addColumn("network_goal_name", "text", (col) => col.notNull())
     .addColumn("name", sql<any>`longtext`, (col) => col.notNull())
-    .addColumn("name", "text", (col) => col.notNull())
     .addColumn("description", sql<any>`longtext`)
-    .addColumn("description", "text")
     .addColumn("image", "text")
     .addColumn("cashback", "text", (col) =>
       col.notNull().defaultTo(sql<any>`0.00`)
@@ -22,15 +20,18 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn("revenue", "text", (col) =>
       col.notNull().defaultTo(sql<any>`0.00`)
     )
-    .addColumn("status", sql<any>`enum`, (col) =>
+    .addColumn("status", sql<any>`enum('publish','draft','trash')`, (col) =>
       col.defaultTo(sql<any>`'publish'`)
     )
-    .addColumn("status", "text", (col) => col.defaultTo(sql<any>`'publish'`))
     .addColumn("is_translated", "boolean", (col) =>
       col.notNull().defaultTo(sql<any>`0`)
     )
-    .addColumn("created_at", "timestamp")
-    .addColumn("updated_at", "timestamp")
+    .addColumn("created_at", "timestamp", (col) =>
+      col.defaultTo(sql<any>`CURRENT_TIMESTAMP`)
+    )
+    .addColumn("updated_at", "timestamp", (col) =>
+      col.defaultTo(sql<any>`CURRENT_TIMESTAMP`)
+    )
     .execute();
 }
 

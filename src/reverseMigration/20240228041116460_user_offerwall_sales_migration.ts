@@ -16,19 +16,21 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn("task_type", "text", (col) => col.notNull())
     .addColumn("amount", "text", (col) => col.notNull())
     .addColumn("payout", "text", (col) => col.notNull())
-    .addColumn("status", sql<any>`enum`, (col) =>
-      col.notNull().defaultTo(sql<any>`'pending'`)
-    )
-    .addColumn("status", "text", (col) =>
-      col.notNull().defaultTo(sql<any>`'pending'`)
+    .addColumn(
+      "status",
+      sql<any>`enum('pending','confirmed','declined')`,
+      (col) => col.notNull().defaultTo(sql<any>`'pending'`)
     )
     .addColumn("extra_info", sql<any>`longtext`)
-    .addColumn("extra_info", "text")
     .addColumn("mail_sent", "boolean", (col) =>
       col.notNull().defaultTo(sql<any>`0`)
     )
-    .addColumn("created_at", "timestamp")
-    .addColumn("updated_at", "timestamp")
+    .addColumn("created_at", "timestamp", (col) =>
+      col.defaultTo(sql<any>`CURRENT_TIMESTAMP`)
+    )
+    .addColumn("updated_at", "timestamp", (col) =>
+      col.defaultTo(sql<any>`CURRENT_TIMESTAMP`)
+    )
     .execute();
 }
 
