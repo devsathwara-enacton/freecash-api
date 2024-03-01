@@ -47,11 +47,11 @@ export const validate = async (req: FastifyRequest, reply: FastifyReply) => {
     network + offer_id,
     offer_id,
     transaction_id,
-    user_id,
+    Number(user_id),
     offer_name,
     type,
-    amount,
-    payout,
+    Number(amount),
+    Number(payout),
     "pending",
     data
   );
@@ -74,14 +74,14 @@ export const validate = async (req: FastifyRequest, reply: FastifyReply) => {
       const result = await postback.insert(
         network,
         transaction_id,
-        user_id,
+        Number(user_id),
         network + offer_id,
         network_goal_id,
         offer_id,
         offer_name,
         type,
-        amount,
-        payout,
+        Number(amount),
+        Number(payout),
         "confirmed",
         data,
         0

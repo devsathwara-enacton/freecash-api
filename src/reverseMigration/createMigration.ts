@@ -150,168 +150,171 @@ WHERE
   }
 
   //postgres
-  // else if (database == "postgres") {
-  //   const schemaResult = await sql<any>`
-  //   SELECT
-  //    *
-  //   FROM
-  //     information_schema.columns
-  //   WHERE
-  //     table_name = ${tableName}
-  //     AND table_schema = ${schemaName}
-  // `.execute(db);
-  //   console.log(schemaResult);
-  //   // Query for table foreign key constraints in PostgreSQL
-  //   const constraintsData = await sql<any>`
-  //   SELECT
-  //   tc.table_schema,
-  //   tc.table_name,
-  //   tc.constraint_name,
-  //   tc.constraint_type,
-  //   kcu.column_name
+  else if (database == "postgres") {
+    const tableData = await sql<any>`SELECT
+    *
+    FROM
+      information_schema."tables"`.execute(db);
+    tableData.rows.forEach(async (tableName) => {
+      const schemaResult = await sql<any>`
+    SELECT
+     *
+    FROM
+      information_schema.columns
+    WHERE
+      table_name = ${tableName.table_name}
+      AND table_schema = ${tableName.table_schema}
+  `.execute(db);
+      // Query for table foreign key constraints in PostgreSQL
+      const constraintsData = await sql<any>`
+    SELECT
+    tc.table_schema,
+    tc.table_name,
+    tc.constraint_name,
+    tc.constraint_type,
+    kcu.column_name
 
-  // FROM
-  //   information_schema.table_constraints AS tc
-  //   JOIN information_schema.key_column_usage AS kcu ON tc.constraint_catalog = kcu.constraint_catalog
-  //     AND tc.constraint_schema = kcu.constraint_schema
-  //     AND tc.constraint_name = kcu.constraint_name
-  //   LEFT JOIN pg_index AS idx ON tc.constraint_name = idx.indexrelid::regclass::text
-  // WHERE
-  //   tc.table_name = ${tableName} -- Replace 'your_table_name' with your actual table name
-  //   AND tc.table_schema = ${schemaName} -- Replace 'your_schema_name' with your actual schema name, e.g., 'public'
-  // ORDER BY
-  //   tc.table_schema,
-  //   tc.table_name,
-  //   tc.constraint_name,
-  //   kcu.ordinal_position;
-  // `.execute(db);
-  //   console.log(constraintsData);
-  //   const schema = schemaResult.rows;
-  //   let migrationUpCode = `import { Kysely, sql } from "kysely";\n\nexport async function up(db: Kysely<any>): Promise<void> {\n  await db.schema.createTable("${tableName}")\n`;
-  //   let migrationDownCode = `export async function down(db: Kysely<any>): Promise<void> {\n  await db.schema.dropTable("${tableName}")`;
-  //   console.log(constraintsData);
-  //   schema.forEach((column: any) => {
-  //     const {
-  //       column_name,
-  //       column_default,
-  //       data_type,
-  //       is_nullable,
-  //       udt_name,
-  //       column_key,
-  //       extra,
-  //       is_generated,
-  //     } = column;
+  FROM
+    information_schema.table_constraints AS tc
+    JOIN information_schema.key_column_usage AS kcu ON tc.constraint_catalog = kcu.constraint_catalog
+      AND tc.constraint_schema = kcu.constraint_schema
+      AND tc.constraint_name = kcu.constraint_name
+    LEFT JOIN pg_index AS idx ON tc.constraint_name = idx.indexrelid::regclass::text
+  WHERE
+    tc.table_name = ${tableName.table_name} -- Replace 'your_table_name' with your actual table name
+    AND tc.table_schema = ${tableName.table_schema} -- Replace 'your_schema_name' with your actual schema name, e.g., 'public'
+  ORDER BY
+    tc.table_schema,
+    tc.table_name,
+    tc.constraint_name,
+    kcu.ordinal_position;
+  `.execute(db);
+      const schema = schemaResult.rows;
+      let migrationUpCode = `import { Kysely, sql } from "kysely";\n\nexport async function up(db: Kysely<any>): Promise<void> {\n  await db.schema.createTable("${tableName.table_name}")\n`;
+      let migrationDownCode = `export async function down(db: Kysely<any>): Promise<void> {\n  await db.schema.dropTable("${tableName.table_name}")`;
+      schema.forEach((column: any) => {
+        const {
+          column_name,
+          column_default,
+          data_type,
+          is_nullable,
+          udt_name,
+          column_key,
+          extra,
+          is_generated,
+        } = column;
 
-  //     let constraints = [];
-  //     constraintsData.rows.forEach((constraint: any) => {
-  //       const { constraint_type } = constraint;
-  //       const colName = constraint.column_name;
-  //       if (colName == column_name) {
-  //         //Indexes
-  //         if (constraint_type === "PRIMARY KEY") {
-  //           constraints.push("primaryKey()");
-  //         }
-  //         if (constraint_type === "UNIQUE") {
-  //           constraints.push("unique()");
-  //         }
-  //       }
-  //     });
-  //     // // Auto Increment
-  //     if (is_generated !== "NEVER") constraints.push("autoIncrement()");
-  //     // // Not Null
-  //     if (is_nullable === "NO") constraints.push("notNull()");
-  //     // // Unique
-  //     // if (COLUMN_KcolEY === "UNI") constraints.push("unique()");
-  //     // Default Value
-  //     if (column_default && column_default !== "NULL") {
-  //       if (column_default === "timestamp") {
-  //         constraints.push(`defaultTo(sql<any>\`CURRENT_TIMESTAMP\`)`);
-  //       } else {
-  //         constraints.push(`defaultTo(sql<any>\`${column_default}\`)`);
-  //       }
-  //     }
+        let constraints = [];
+        constraintsData.rows.forEach((constraint: any) => {
+          const { constraint_type } = constraint;
+          const colName = constraint.column_name;
+          if (colName == column_name) {
+            //Indexes
+            if (constraint_type === "PRIMARY KEY") {
+              constraints.push("primaryKey()");
+            }
+            if (constraint_type === "UNIQUE") {
+              constraints.push("unique()");
+            }
+          }
+        });
+        // // Auto Increment
+        if (is_generated !== "NEVER") constraints.push("autoIncrement()");
+        // // Not Null
+        if (is_nullable === "NO") constraints.push("notNull()");
+        // // Unique
+        // if (COLUMN_KcolEY === "UNI") constraints.push("unique()");
+        // Default Value
+        if (column_default && column_default !== "NULL") {
+          if (column_default === "timestamp") {
+            constraints.push(`defaultTo(sql<any>\`CURRENT_TIMESTAMP\`)`);
+          } else {
+            constraints.push(`defaultTo(sql<any>\`${column_default}\`)`);
+          }
+        }
 
-  //     if (udt_name == "varchar") {
-  //       if (constraints.length > 0) {
-  //         migrationUpCode += `    .addColumn("${column_name}", sql<any>\`${udt_name}\`, ${
-  //           constraints.length > 0
-  //             ? `(col) => col.${constraints.join(".")}`
-  //             : "null"
-  //         })\n`;
-  //       } else {
-  //         migrationUpCode += `    .addColumn("${column_name}", sql<any>\`${udt_name}\`)\n`;
-  //       }
-  //     }
+        if (udt_name == "varchar") {
+          if (constraints.length > 0) {
+            migrationUpCode += `    .addColumn("${column_name}", sql<any>\`${udt_name}\`, ${
+              constraints.length > 0
+                ? `(col) => col.${constraints.join(".")}`
+                : "null"
+            })\n`;
+          } else {
+            migrationUpCode += `    .addColumn("${column_name}", sql<any>\`${udt_name}\`)\n`;
+          }
+        }
 
-  //     if (udt_name === "enum") {
-  //       if (constraints.length > 0) {
-  //         migrationUpCode += `.addColumn("${column_name}", sql<any>\`${udt_name}\`, ${
-  //           constraints.length > 0
-  //             ? `(col) => col.${constraints.join(".")}`
-  //             : "null"
-  //         })\n`;
-  //       } else {
-  //         migrationUpCode += `    .addColumn("${column_name}", "${udt_name}")\n`;
-  //       }
-  //     }
-  //     if (udt_name === "JSON") {
-  //       if (constraints.length > 0) {
-  //         migrationUpCode += `    .addColumn("${column_name}", sql<any>\`${udt_name}\`, ${
-  //           constraints.length > 0
-  //             ? `(col) => col.${constraints.join(".")}`
-  //             : "null"
-  //         })\n`;
-  //       } else {
-  //         migrationUpCode += `    .addColumn("${column_name}", sql<any>\`${udt_name}\`)\n`;
-  //       }
-  //     }
+        if (udt_name === "enum") {
+          if (constraints.length > 0) {
+            migrationUpCode += `.addColumn("${column_name}", sql<any>\`${udt_name}\`, ${
+              constraints.length > 0
+                ? `(col) => col.${constraints.join(".")}`
+                : "null"
+            })\n`;
+          } else {
+            migrationUpCode += `    .addColumn("${column_name}", "${udt_name}")\n`;
+          }
+        }
+        if (udt_name === "JSON") {
+          if (constraints.length > 0) {
+            migrationUpCode += `    .addColumn("${column_name}", sql<any>\`${udt_name}\`, ${
+              constraints.length > 0
+                ? `(col) => col.${constraints.join(".")}`
+                : "null"
+            })\n`;
+          } else {
+            migrationUpCode += `    .addColumn("${column_name}", sql<any>\`${udt_name}\`)\n`;
+          }
+        }
 
-  //     if (
-  //       udt_name !== "enum" &&
-  //       udt_name !== "jsonb" &&
-  //       udt_name !== "varchar"
-  //     ) {
-  //       // Mapping SQL data types to Kysely data types
-  //       let kyselyType = mapPgSqlTypeToKysely(udt_name);
-  //       if (constraints.length > 0) {
-  //         migrationUpCode += `    .addColumn("${column_name}", "${kyselyType}", (col) => col.${constraints.join(
-  //           "."
-  //         )})\n`;
-  //       } else {
-  //         migrationUpCode += `    .addColumn("${column_name}", "${kyselyType}")\n`;
-  //       }
-  //     }
-  //     constraintsData.rows.forEach((constraint: any) => {
-  //       if (column_name == constraint.COLUMN_NAME) {
-  //         migrationUpCode += `.addForeignKeyConstraint("${constraint.CONSTRAINT_NAME}", ["${constraint.COLUMN_NAME}"], "${constraint.REFERENCED_TABLE_NAME}", ["${constraint.REFERENCED_COLUMN_NAME}"]`;
-  //         if (constraint.UPDATE_RULE) {
-  //           migrationUpCode += `,(cb: any) =>
-  //       cb.onUpdate('${constraint.UPDATE_RULE.toLowerCase()}')`;
-  //           if (constraint.DELETE_RULE) {
-  //             migrationUpCode += `.onDelete('${constraint.DELETE_RULE.toLowerCase()}')`;
-  //           }
-  //         }
-  //         migrationUpCode += ")\n";
-  //       }
-  //     });
-  //   });
+        if (
+          udt_name !== "enum" &&
+          udt_name !== "jsonb" &&
+          udt_name !== "varchar"
+        ) {
+          // Mapping SQL data types to Kysely data types
+          let kyselyType = mapPgSqlTypeToKysely(udt_name);
+          if (constraints.length > 0) {
+            migrationUpCode += `    .addColumn("${column_name}", "${kyselyType}", (col) => col.${constraints.join(
+              "."
+            )})\n`;
+          } else {
+            migrationUpCode += `    .addColumn("${column_name}", "${kyselyType}")\n`;
+          }
+        }
+        constraintsData.rows.forEach((constraint: any) => {
+          if (column_name == constraint.COLUMN_NAME) {
+            migrationUpCode += `.addForeignKeyConstraint("${constraint.CONSTRAINT_NAME}", ["${constraint.COLUMN_NAME}"], "${constraint.REFERENCED_TABLE_NAME}", ["${constraint.REFERENCED_COLUMN_NAME}"]`;
+            if (constraint.UPDATE_RULE) {
+              migrationUpCode += `,(cb: any) =>
+        cb.onUpdate('${constraint.UPDATE_RULE.toLowerCase()}')`;
+              if (constraint.DELETE_RULE) {
+                migrationUpCode += `.onDelete('${constraint.DELETE_RULE.toLowerCase()}')`;
+              }
+            }
+            migrationUpCode += ")\n";
+          }
+        });
+      });
 
-  //   migrationUpCode += "    .execute();\n}\n\n";
-  //   migrationDownCode += ".execute();\n}";
+      migrationUpCode += "    .execute();\n}\n\n";
+      migrationDownCode += ".execute();\n}";
 
-  //   const timestamp = new Date().toISOString().replace(/[^0-9]/g, "");
-  //   // Optionally, write the generated code to files
-  //   const migrationFilePath = path.join(
-  //     __dirname,
-  //     `./migration`,
-  //     `${timestamp}_${tableName}_migration.ts`
-  //   );
-  //   fs.writeFileSync(
-  //     migrationFilePath,
-  //     `${migrationUpCode}${migrationDownCode}`
-  //   );
-  //   console.log(`Migration file generated at: ${migrationFilePath}`);
-  // }
+      const timestamp = new Date().toISOString().replace(/[^0-9]/g, "");
+      // Optionally, write the generated code to files
+      const migrationFilePath = path.join(
+        __dirname,
+        `./migration`,
+        `${timestamp}_${tableName.table_name}_migration.ts`
+      );
+      fs.writeFileSync(
+        migrationFilePath,
+        `${migrationUpCode}${migrationDownCode}`
+      );
+      console.log(`Migration file generated at: ${migrationFilePath}`);
+    });
+  }
 }
 
 function mapPgSqlTypeToKysely(sqlType: string): string {
