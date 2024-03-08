@@ -35,5 +35,8 @@ export const config = {
       googleClientSecret: process.env.GOOGLE_SECRET || "",
       googleCallbackUrl: process.env.GOOGLE_CALLBACKURL,
     },
+    redis: {
+      url: process.env.REDIS_URL,
+    },
   },
 };

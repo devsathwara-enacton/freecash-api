@@ -22,7 +22,7 @@ import redisPlugin from "./service/redis";
 import { swaggerOptions, swaggerUiOptions } from "./utils/swagger";
 import { db } from "./database/database";
 
-const createApp = (): FastifyInstance => {
+export const createApp = (): FastifyInstance => {
   const app = fastify({ logger: true }) as FastifyInstance;
   const sessionSecret = config.env.app.sessionSecret?.toString();
   if (!sessionSecret) {
@@ -62,7 +62,9 @@ const createApp = (): FastifyInstance => {
 
   app.register(fastifySwagger, swaggerOptions);
   app.register(fastifySwaggerUi, swaggerUiOptions);
-  redisPlugin(app, { url: "redis://127.0.0.1:6379" });
+  redisPlugin(app, {
+    url: config.env.redis.url ? config.env.redis.url.toString() : "",
+  });
 
   // Register autoload for routes
   app.register(autoload, {
@@ -108,7 +110,6 @@ const createApp = (): FastifyInstance => {
         authuser: string;
         prompt: string;
       };
-      console.log(req.user);
       // return reply.redirect(
       //   `/google/auth?code=${code}&scope=${scope}&authuser=${authuser}&prompt=${prompt}`
       // );

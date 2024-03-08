@@ -23,7 +23,7 @@ export default async function (app: FastifyInstance) {
     preHandler: isAuthenticated,
     method: "GET",
     url: "/click/insert",
-    schema: { querystring: clickTaskQuerySchema, tags: ["Tasks"] },
+    schema: { tags: ["Tasks"] },
     handler: taskController.clickInsert,
   });
 }

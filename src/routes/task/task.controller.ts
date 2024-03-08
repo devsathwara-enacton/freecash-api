@@ -86,6 +86,7 @@ export const clickInsert = async (req: FastifyRequest, reply: FastifyReply) => {
   const referer = req.headers.referer as string;
   const countries = req.headers.countries as string;
   const decoded = await decodeToken(reply, accessToken);
+  console.log(userAgent, referer, countries);
   const result = await task.clickInsert(
     decoded.id,
     platform,
